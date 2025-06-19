@@ -1,0 +1,206 @@
+package main;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+import constant.Message;
+import controller.StudentController;
+import dto.StudentDTO;
+import utility.Validator;
+
+public class Main {
+
+    private static Scanner sc = new Scanner(System.in);;
+    private static StudentController studentController = new StudentController();
+    private static StudentDTO dto = new StudentDTO();
+
+    public static void main(String[] args) {
+        // declear
+
+        // handle
+        while (true) {
+            try {
+                // display main menu
+                studentController.displayMenu();
+                // input choice
+                int choice = Integer.parseInt(sc.nextLine());
+                if (!Validator.isLimitInRange(choice, 1, 5)) {
+                    System.out.println(Message.ERROR_INVALID_CHOICE);
+                    continue;
+                }
+
+                // handle choice
+                switch (choice) {
+                    // create new course for student
+                    case 1:
+                        // check is full in db
+                        if (studentController.isDatabaseFull()) {
+                            System.out.println(Message.PROMPT_ADD_MORE);
+                            String addMore = sc.nextLine();
+                            // if input = "N" or blank or => continue
+                            if (!Validator.isValidYesNo(addMore)) {
+                                continue;
+                            }
+                            continue;
+                        }
+                        // input ID
+                        System.out.print(Message.PROMPT_ID);
+                        int id = Integer.parseInt(sc.nextLine());
+
+                        // check valid id
+
+                        if (!Validator.isValidId(id)) {
+                            System.out.println(Message.ERROR_INVALID_ID);
+                            continue;
+                        }
+
+                        // if id exist in db => show error exist
+                        String name;
+                        if (studentController.isExist(id)) {
+                            name = studentController.getNameStudentById(id);
+                            System.out.format("Name: %s\n", name);
+                        } else {
+                            // input name
+                            System.out.print(Message.PROMPT_NAME);
+                            name = sc.nextLine();
+                            if (!Validator.isValidString(name)) {
+                                System.out.println(Message.ERROR_EMPTY_INPUT);
+                            }
+                        }
+
+                        // input semester
+                        System.out.print(Message.PROMPT_SEMESTER);
+                        int semester = Integer.parseInt(sc.nextLine());
+                        if (!Validator.isValidSemester(semester, 1, 9)) {
+                            System.out.println(Message.ERROR_INVALID_COURSE);
+                            continue;
+                        }
+
+                        // input course
+                        List<Integer> idCourse = getCourseSelection();
+                        // set data dto
+                        dtoSetData(id, name, semester, idCourse);
+                        // set data for controller
+                        studentController.setInput(dto);
+                        // create new student
+                        studentController.createStudent();
+                        break;
+                    // find and sort by sub name
+                    case 2:
+                        // input search name
+                        System.out.print(Message.PROMPT_SEARCH_NAME);
+                        String searchName = sc.nextLine();
+                        if (!Validator.isValidString(searchName)) {
+                            System.out.println(Message.ERROR_EMPTY_INPUT);
+                            continue;
+                        }
+                        // dto set data
+                        dtoSetData(0, searchName, 0, null);
+                        // handle find and sort
+                        studentController.findAndSort();
+                        break;
+                    // update or delete
+                    case 3:
+                        // input id
+                        System.out.print(Message.PROMPT_ID);
+                        int mId = Integer.parseInt(sc.nextLine());
+                        // check valid id
+                        if (!Validator.isValidId(mId)) {
+                            System.out.println(Message.ERROR_INVALID_ID);
+                            continue;
+                        }
+                        // check exist in db
+                        if (!studentController.isExist(mId)) {
+                            System.out.println(Message.ERROR_STUDENT_NOT_FOUND);
+                        }
+
+                        // display list student by id
+                        studentController.displayStudentById(mId);
+
+                        // choice u or d
+                        System.out.print(Message.PROMPT_UPDATE_DELETE);
+                        String action = sc.nextLine().trim();
+                        // check valid choice
+                        if (!Validator.isValidUpdateDelete(action)) {
+                            System.out.println(Message.ERROR_INPUT_UPDATE_DELETE);
+                            continue;
+                        }
+
+                        switch (action.toLowerCase()) {
+                            case "u":
+                                // input new name
+                                System.out.print("Enter new name: ");
+                                String newName = sc.nextLine();
+                                // check valid name
+                                if (!Validator.isValidString(newName.trim())) {
+                                    System.out.println(Message.ERROR_EMPTY_INPUT);
+                                    continue;
+                                }
+                                // input new semester
+                                System.out.print("Enter new semester: ");
+                                int newSemester = Integer.parseInt(sc.nextLine());
+                                // check valid name
+                                if (!Validator.isLimitInRange(newSemester, 1, 9)) {
+                                    System.out.println(Message.ERROR_INVALID_SEMESTER);
+                                    continue;
+                                }
+
+                                List<Integer> newIdCourse = getCourseSelection();
+                                // set data for dto
+                                dtoSetData(mId, newName, newSemester, newIdCourse);
+                                // update
+                                studentController.update();
+                                break;
+                            case "d":
+                                studentController.deleteStudent(mId);
+                                break;
+
+                        }
+                        break;
+                    // report
+                    case 4:
+
+                        break;
+                    // exit
+                    case 5:
+                        System.exit(0);
+                        sc.close();
+                        break;
+
+                }
+            } catch (NumberFormatException e) {
+                System.out.println(e);
+            }
+        }
+    }
+
+    // getCourseSelection
+    private static List<Integer> getCourseSelection() {
+        studentController.displayAllCourse();
+        // input list course by id
+        System.out.print(Message.PROMPT_COURSE);
+        String courseInput = sc.nextLine();
+        List<Integer> courseIds = new ArrayList<>();
+
+        // check input
+        if (courseInput.isEmpty()) {
+            return courseIds;
+        }
+
+        String[] listGetCourse = courseInput.split("\\s+");
+        // loop in array to get list course id
+        for (String getCourse : listGetCourse) {
+            int courseId = Integer.parseInt(getCourse.trim());
+            courseIds.add(courseId);
+        }
+
+        return courseIds;
+    }
+
+    private static void dtoSetData(int id, String name, int semester, List<Integer> courseIds) {
+        dto.setId(id);
+        dto.setName(name);
+        dto.setSemester(semester);
+        dto.setCourse(courseIds);
+    }
+}
