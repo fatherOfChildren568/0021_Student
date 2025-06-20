@@ -5,8 +5,9 @@ import java.util.Comparator;
 import java.util.List;
 
 import constant.Message;
-import dto.StudentDTO;
+import dto.EnrollmentDTO;
 import model.CourseModel;
+import model.EnrolledCourse;
 import model.StudentModel;
 import view.StudentView;
 
@@ -15,7 +16,7 @@ public class StudentController {
     private List<StudentModel> listStudents;
     private List<CourseModel> availableCourses;
     private StudentView studentView = new StudentView();
-    private StudentDTO input = new StudentDTO();
+    private EnrollmentDTO input = new EnrollmentDTO();
 
     // StudentController
     public StudentController() {
@@ -24,10 +25,11 @@ public class StudentController {
         availableCourses.add(new CourseModel(1, "Java"));
         availableCourses.add(new CourseModel(2, ".Net"));
         availableCourses.add(new CourseModel(3, "C/C++"));
+
     }
 
     // setInput
-    public void setInput(StudentDTO input) {
+    public void setInput(EnrollmentDTO input) {
         this.input = input;
     }
 
@@ -70,17 +72,23 @@ public class StudentController {
         int semester = input.getSemester();
         List<Integer> courseIds = input.getCourse();
 
-        // create new student
-        StudentModel newStudent = new StudentModel(id, name, semester);
+        // create list to store name of course
+        List<CourseModel> listCourses = new ArrayList<>();
         // loop in courseIds to get Id
         for (Integer courseId : courseIds) {
             // getCourseById
             CourseModel course = getCourseById(courseId);
             if (course != null) {
                 // add course for new student
-                newStudent.getCourse().add(course);
+                listCourses.add(course);
             }
         }
+
+        EnrolledCourse enrolledCourse = new EnrolledCourse(semester, listCourses);
+        // create new student
+        StudentModel newStudent = new StudentModel(id, name);
+        // add
+        newStudent.addNewCourses(enrolledCourse);
         // add student in db
         listStudents.add(newStudent);
     }
@@ -94,16 +102,16 @@ public class StudentController {
                 return course;
             }
         }
-        return null;
+        return new CourseModel();
     }
 
     // findAndSort
     public void findAndSort() {
         // sort
-        sortListStudents();
+        sortListStudentsByName();
     }
 
-    private void sortListStudents() {
+    private void sortListStudentsByName() {
         // getListStudentsByName
         List<StudentModel> list = getListStudentsByName();
         // check null
@@ -145,57 +153,41 @@ public class StudentController {
 
     // disPlayListStudentById
     public void displayStudentById(int mId) {
-        StudentModel student = getStudentById(mId);
+        List<StudentModel> list = getListStudentById(mId);
         // check null
-        if (student == null) {
+        if (list.isEmpty()) {
             studentView.displayNotice(Message.ERROR_STUDENT_NOT_FOUND);
             return;
         }
         // else
-        studentView.setHeader(Message.HEADER_STUDENT_LIST);
-        studentView.setBody(student.toString());
+        StringBuilder sb = new StringBuilder();
+        studentView.setHeader(Message.HEADER_STUDENT_LIST_STT);
+        // create variable run
+        int i = 1;
+        for (StudentModel studentModel : list) {
+            sb.append(studentModel.toStringByStt(i));
+            i++;
+        }
+        studentView.setBody(sb.toString());
         studentView.display();
     }
 
-    // getStudentById
-    private StudentModel getStudentById(int Id) {
+    // getListStudentById
+    private List<StudentModel> getListStudentById(int Id) {
+        // create list to store
+        List<StudentModel> list = new ArrayList<>();
+        // loop in listStudents to get student sastify id
         for (StudentModel student : listStudents) {
             if (student.getId() == Id) {
-                return student;
+                list.add(student);
             }
         }
-        return null;
+        return list;
     }
 
-    // deleteStudent
-    public void deleteStudent(int id) {
-        // getStudentById
-        StudentModel student = getStudentById(id);
-        // check null
-        if (student == null) {
-            studentView.displayNotice(Message.ERROR_STUDENT_NOT_FOUND);
-            return;
-        }
-
-        // delete
-        listStudents.remove(student);
-    }
-
-    // update
-    public void update() {
-        // getStudentById
-        StudentModel student = getStudentById(input.getId());
-        // set new data
-        student.setName(input.getName());
-        student.setSemester(input.getSemester());
-
-        // clear old course
-        student.getCourse().clear();
-        // set new course
-        for (int courseId : input.getCourse()) {
-            CourseModel course = getCourseById(courseId);
-            student.getCourse().add(course);
-        }
+    // getSizeOfListStudentById
+    public int getSizeOfListStudentById(int id) {
+        return getListStudentById(id).size();
     }
 
     // getNameStudentById
@@ -207,4 +199,103 @@ public class StudentController {
         }
         return null;
     }
+
+    // displayListStudent
+    public void displayListStudent() {
+        studentView.setHeader(Message.HEADER_STUDENT_LIST);
+        StringBuilder sb = new StringBuilder();
+        for (StudentModel studentModel : listStudents) {
+            sb.append(studentModel);
+        }
+        studentView.setBody(sb.toString());
+        studentView.display();
+    }
+
+    // isExistInOneSemester
+    public boolean isExistInOneSemester(int id, int semester, StudentModel exclucdeStudent) {
+        // loop in listStudents
+        for (StudentModel studentModel : listStudents) {
+            if(studentModel == exclucdeStudent){
+                continue;
+            }
+            // if have this id
+            if (studentModel.getId() == id) {
+                // loop in enrollments
+                for (EnrolledCourse enrolledCourse : studentModel.getEnrolledCourses()) {
+                    // if also have this semester
+                    if (enrolledCourse.getSemester() == semester) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    // update
+    public void update(int updateChoice) {
+        // get list student by id need update
+        StudentModel studentUpdate = getStudentNeedChange(updateChoice);
+
+        int id = input.getId();
+        String newName = input.getName();
+        int newSemester = input.getSemester();
+        List<Integer> courseIds = input.getCourse();
+
+        
+
+        // create list to store name of course
+        List<CourseModel> newListCourses = new ArrayList<>();
+        // loop in courseIds to get Id
+        for (Integer courseId : courseIds) {
+            // getCourseById
+            CourseModel course = getCourseById(courseId);
+            if (course != null) {
+                // add course for new student
+                newListCourses.add(course);
+            }
+        }
+        if (!newName.equalsIgnoreCase(studentUpdate.getName())) {
+            setAllName(id, newName);
+        }
+        EnrolledCourse enrolledCourse = new EnrolledCourse(newSemester, newListCourses);
+        studentUpdate.addNewCourses(enrolledCourse);
+    }
+
+    // setAllName
+    private void setAllName(int id, String newName) {
+        for (StudentModel studentModel : listStudents) {
+            if (studentModel.getId() == id) {
+                studentModel.setName(newName);
+            }
+        }
+    }
+
+    // get student by id
+    private StudentModel getStudentNeedChange(int choice) {
+        // get list student by id
+        List<StudentModel> list = getListStudentById(input.getId());
+        // get 1 student that is update choice
+        int i = 1;
+        for (StudentModel studentModel : list) {
+            if (i == choice) {
+                return studentModel;
+            }
+        }
+        return null;
+    }
+
+    // delete
+    public void delete(int deleteChoice) {
+        // get student need be remove
+        StudentModel deleteStudent = getStudentNeedChange(deleteChoice);
+        // remove
+        listStudents.remove(deleteStudent);
+    }
+
+    // report
+    public void report() {
+
+    }
+
 }
