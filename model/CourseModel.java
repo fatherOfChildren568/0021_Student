@@ -6,6 +6,10 @@ public class CourseModel {
     private String course;
 
     // constructor
+    public CourseModel() {
+    }
+
+    // constructor
     public CourseModel(int idCourse, String course) {
         this.idCourse = idCourse;
         this.course = course;

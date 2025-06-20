@@ -7,27 +7,16 @@ public class StudentModel {
     // declear
     private int id;
     private String name;
-    private int semester;
-    private List<CourseModel> course;
+    private List<EnrolledCourse> enrolledCourses;
 
     // constructor mo parameter
     public StudentModel() {
     }
 
-    // StudentModel
-    public StudentModel(int id, String name, int semester) {
-        this.id = id;
-        this.name = name;
-        this.semester = semester;
-        this.course = new ArrayList<>();
-    }
-
     // constructor have parameter
-    public StudentModel(int id, String name, int semester, List<CourseModel> course) {
+    public StudentModel(int id, String name) {
         this.id = id;
         this.name = name;
-        this.semester = semester;
-        this.course = course;
     }
 
     // getId
@@ -50,29 +39,28 @@ public class StudentModel {
         this.name = name;
     }
 
-    // getSemester
-    public int getSemester() {
-        return semester;
+    // getEnrolledCourses
+    public List<EnrolledCourse> getEnrolledCourses() {
+        return enrolledCourses;
     }
 
-    // setSemester
-    public void setSemester(int semester) {
-        this.semester = semester;
+    // setEnrolledCourses
+    public void setEnrolledCourses(List<EnrolledCourse> enrolledCourses) {
+        this.enrolledCourses = enrolledCourses;
     }
 
-    // getCourse
-    public List<CourseModel> getCourse() {
-        return course;
-    }
-
-    // setCourse
-    public void setCourse(List<CourseModel> course) {
-        this.course = course;
+    // add new course
+    public void addNewCourses(EnrolledCourse enrolledCourse) {
+        enrolledCourses = new ArrayList<>();
+        enrolledCourses.add(enrolledCourse);
     }
 
     @Override
     public String toString() {
-        return String.format("%-5s%-15s%-15s%-20s\n", getId(), getName(), getSemester(), getCourse());
+        return  String.format("%-5s%-15s%-30s\n", id, name, enrolledCourses);
     }
 
+    public String toStringByStt(int i) {
+        return  String.format("%-5s%-15s%-30s\n", i, name, enrolledCourses);
+    }
 }
