@@ -187,7 +187,6 @@ public class Main {
                         break;
                     // report
                     case 4:
-                        studentController.displayListStudent();
                         studentController.report();
                         break;
                     // exit

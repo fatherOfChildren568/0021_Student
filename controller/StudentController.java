@@ -9,6 +9,7 @@ import dto.EnrollmentDTO;
 import model.CourseModel;
 import model.EnrolledCourse;
 import model.StudentModel;
+import service.StudentService;
 import view.StudentView;
 
 public class StudentController {
@@ -17,6 +18,7 @@ public class StudentController {
     private List<CourseModel> availableCourses;
     private StudentView studentView = new StudentView();
     private EnrollmentDTO input = new EnrollmentDTO();
+    private StudentService studentService = new StudentService();
 
     // StudentController
     public StudentController() {
@@ -295,7 +297,14 @@ public class StudentController {
 
     // report
     public void report() {
-
+        studentService.setList(listStudents);
+        String body = studentService.getReport();
+        //set header
+        studentView.setHeader(Message.HEADER_REPORT);
+        //set body
+        studentView.setBody(body);
+        //display
+        studentView.display();
     }
 
 }

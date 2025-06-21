@@ -36,7 +36,7 @@ public class Message {
     public static final String HEADER_STUDENT_LIST_STT = String.format("%-5s%-15s%-10s%-20s","STT", "Name", "Semester", "Courses");
     public static final String HEADER_SEPARATOR = "------------------------------------------------------------";
     public static final String HEADER_COURSE_LIST = String.format("%-5s %-15s", "ID", "Course Name");
-    public static final String HEADER_REPORT = String.format("%-15s %-15s %-10s", 
+    public static final String HEADER_REPORT = String.format("%-5s%-15s%-15s%-10s", "ID",
             "Student Name", "Course", "Count");
     
     public static final String EXIT_MESSAGE = "Thank you for using Student Management System!";
