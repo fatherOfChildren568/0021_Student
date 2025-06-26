@@ -3,6 +3,8 @@ package main;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+
+import constant.CourseType;
 import constant.Message;
 import controller.StudentController;
 import dto.EnrollmentDTO;
@@ -202,7 +204,7 @@ public class Main {
         }
     }
 
-    // getCourseSelection
+    // getCourseSelection - updated version
     private static List<Integer> getCourseSelection() {
         studentController.displayAllCourse();
         // input list course by id
@@ -218,8 +220,17 @@ public class Main {
         String[] listGetCourse = courseInput.split("\\s+");
         // loop in array to get list course id
         for (String getCourse : listGetCourse) {
-            int courseId = Integer.parseInt(getCourse.trim());
-            courseIds.add(courseId);
+            try {
+                int courseId = Integer.parseInt(getCourse.trim());
+                // Validate courseId với enum
+                if (CourseType.getById(courseId) != null) {
+                    courseIds.add(courseId);
+                } else {
+                    System.out.println("Invalid course ID: " + courseId);
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid course input: " + getCourse);
+            }
         }
 
         return courseIds;

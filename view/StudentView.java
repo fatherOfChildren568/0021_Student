@@ -1,7 +1,7 @@
 package view;
 
 import java.util.List;
-
+import constant.CourseType;
 import model.CourseModel;
 
 public class StudentView {
@@ -20,7 +20,7 @@ public class StudentView {
         System.out.print("Choice: ");
     }
 
-    //displayCourses
+    // displayCourses
     public void displayCourses(List<CourseModel> courses) {
         System.out.println("List courses");
         for (CourseModel course : courses) {
@@ -28,25 +28,33 @@ public class StudentView {
         }
     }
 
-    //setHeader
+    // setHeader
     public void setHeader(String header) {
         this.header = header;
     }
 
-    //setBody
+    // setBody
     public void setBody(String body) {
         this.body = body;
     }
 
-    //display
-    public void display(){
+    // display
+    public void display() {
         System.out.println(header);
         System.out.print(body);
     }
 
-    //display notice, error
-    public void displayNotice(String notice){
+    // display notice, error
+    public void displayNotice(String notice) {
         System.out.println(notice);
+    }
+
+    public void displayCourses() {
+        System.out.println("Available Courses:");
+        CourseType[] courses = CourseType.getAllCourses();
+        for (CourseType course : courses) {
+            System.out.println(course.toString());
+        }
     }
 
 }

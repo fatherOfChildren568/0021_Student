@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import constant.CourseType;
 import constant.Message;
 import dto.EnrollmentDTO;
 import model.CourseModel;
@@ -14,20 +15,13 @@ import view.StudentView;
 
 public class StudentController {
     // declear
-    private List<StudentModel> listStudents;
-    private List<CourseModel> availableCourses;
+    private List<StudentModel> listStudents = new ArrayList<>();
     private StudentView studentView = new StudentView();
     private EnrollmentDTO input = new EnrollmentDTO();
     private StudentService studentService = new StudentService();
 
     // StudentController
     public StudentController() {
-        this.listStudents = new ArrayList<>();
-        this.availableCourses = new ArrayList<>();
-        availableCourses.add(new CourseModel(1, "Java"));
-        availableCourses.add(new CourseModel(2, ".Net"));
-        availableCourses.add(new CourseModel(3, "C/C++"));
-
     }
 
     // setInput
@@ -55,15 +49,19 @@ public class StudentController {
         return listStudents.size() >= Message.MAX_STUDENTS;
     }
 
-    // getAvailableCourses
-    public List<CourseModel> getAvailableCourses() {
-        return availableCourses;
-    }
-
     // displayAllCourse
     public void displayAllCourse() {
-        List<CourseModel> courses = getAvailableCourses();
-        studentView.displayCourses(courses);
+        studentView.displayCourses();
+    }
+
+    // get 1 course by its id
+    private CourseModel getCourseById(int courseId) {
+        // get CourseType by id
+        CourseType courseType = CourseType.getById(courseId);
+        if (courseType != null) {
+            return new CourseModel(courseType);
+        }
+        return null;
     }
 
     // createStudent
@@ -93,18 +91,6 @@ public class StudentController {
         newStudent.addNewCourses(enrolledCourse);
         // add student in db
         listStudents.add(newStudent);
-    }
-
-    // get 1 course by its id
-    private CourseModel getCourseById(int courseId) {
-        // loop in availableCourses
-        for (CourseModel course : availableCourses) {
-            // compare courseId
-            if (course.getIdCourse() == courseId) {
-                return course;
-            }
-        }
-        return new CourseModel();
     }
 
     // findAndSort
@@ -217,7 +203,7 @@ public class StudentController {
     public boolean isExistInOneSemester(int id, int semester, StudentModel exclucdeStudent) {
         // loop in listStudents
         for (StudentModel studentModel : listStudents) {
-            if(studentModel == exclucdeStudent){
+            if (studentModel == exclucdeStudent) {
                 continue;
             }
             // if have this id
@@ -243,8 +229,6 @@ public class StudentController {
         String newName = input.getName();
         int newSemester = input.getSemester();
         List<Integer> courseIds = input.getCourse();
-
-        
 
         // create list to store name of course
         List<CourseModel> newListCourses = new ArrayList<>();
@@ -299,11 +283,11 @@ public class StudentController {
     public void report() {
         studentService.setList(listStudents);
         String body = studentService.getReport();
-        //set header
+        // set header
         studentView.setHeader(Message.HEADER_REPORT);
-        //set body
+        // set body
         studentView.setBody(body);
-        //display
+        // display
         studentView.display();
     }
 

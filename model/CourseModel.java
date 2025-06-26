@@ -1,5 +1,7 @@
 package model;
 
+import constant.CourseType;
+
 public class CourseModel {
     // declear
     private int idCourse;
@@ -13,6 +15,12 @@ public class CourseModel {
     public CourseModel(int idCourse, String course) {
         this.idCourse = idCourse;
         this.course = course;
+    }
+
+    //
+    public CourseModel(CourseType type) {
+        this.idCourse = type.getId();
+        this.course = type.getNameCourse();
     }
 
     // getId
