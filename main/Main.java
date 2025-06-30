@@ -209,19 +209,19 @@ public class Main {
         studentController.displayAllCourse();
         // input list course by id
         System.out.print(Message.PROMPT_COURSE);
-        String courseInput = sc.nextLine().trim();
+        String courseIdInput = sc.nextLine().trim();
         List<Integer> courseIds = new ArrayList<>();
 
         // check input
-        if (courseInput.isEmpty()) {
+        if (courseIdInput.isEmpty()) {
             return courseIds;
         }
 
-        String[] listGetCourse = courseInput.split("\\s+");
+        String[] listGetCourseId = courseIdInput.split("\\s+");
         // loop in array to get list course id
-        for (String getCourse : listGetCourse) {
+        for (String getCourseId : listGetCourseId) {
             try {
-                int courseId = Integer.parseInt(getCourse.trim());
+                int courseId = Integer.parseInt(getCourseId.trim());
                 // Validate courseId với enum
                 if (CourseType.getById(courseId) != null) {
                     courseIds.add(courseId);
@@ -229,7 +229,7 @@ public class Main {
                     System.out.println("Invalid course ID: " + courseId);
                 }
             } catch (NumberFormatException e) {
-                System.out.println("Invalid course input: " + getCourse);
+                System.out.println("Invalid course input: " + getCourseId);
             }
         }
 
